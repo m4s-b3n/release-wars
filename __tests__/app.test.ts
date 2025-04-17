@@ -1,5 +1,5 @@
-import request from 'supertest';
-import app from '../src/index';
+import express from 'express';
+import app, { refreshCache, renderCachedData } from '../src/index';
 import { fetchReleaseData } from '../src/utils';
 import { vi } from 'vitest';
 
@@ -44,34 +44,55 @@ describe('App Endpoints', () => {
       changeType: 'Minor',
     });
 
-    const response = await request(app).get('/');
+    await refreshCache();
 
-    expect(response.status).toBe(200);
-    expect(response.text).toContain('Last Version: v1.0.0');
-    expect(response.text).toContain('Previous Version: v0.9.0');
-    expect(response.text).toContain('Change Type: Minor');
-    expect(response.text).toContain('Initial commit');
-    expect(response.text).toContain('Second commit');
-    expect(response.text).toContain('Third commit');
-    expect(response.text).toContain('Fourth commit');
-    expect(response.text).toContain('Fifth commit');
-    expect(response.text).not.toContain('Sixth commit'); // Only 5 commits are shown
-    expect(response.text).not.toContain('Seventh commit'); // Only 5 commits are shown
-    expect(response.text).not.toContain('Eighth commit'); // Only 5 commits are shown
-    expect(response.text).not.toContain('Ninth commit'); // Only 5 commits are shown
-    expect(response.text).not.toContain('Tenth commit'); // Only 5 commits are shown
+    const mockRes = {
+      render: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    } as unknown as express.Response;
+
+    renderCachedData(mockRes);
+
+    expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
+    expect(mockRes.render).toHaveBeenCalled();
+    expect(mockRes.render).toHaveBeenCalledWith('index', {
+      commits: [
+        { sha: '123', commit: { message: 'Initial commit' } },
+        { sha: '456', commit: { message: 'Second commit' } },
+        { sha: '789', commit: { message: 'Third commit' } },
+        { sha: 'abc', commit: { message: 'Fourth commit' } },
+        { sha: 'def', commit: { message: 'Fifth commit' } }
+      ],
+      currentVersion: 'v1.0.0',
+      previousVersion: 'v0.9.0',
+      changeType: 'Minor',
+      repo: 'owner/repo',
+    });
   });
 
   it('should handle no data at all', async () => {
     mockedFetchReleaseData.mockResolvedValueOnce({});
 
-    const response = await request(app).get('/');
+    await refreshCache();
 
-    expect(response.status).toBe(200);
-    expect(response.text).toContain('Last Version: N/A');
-    expect(response.text).toContain('No previous version available');
-    expect(response.text).toContain('Change Type: N/A');
-    expect(response.text).toContain('No commits available');
+    const mockRes = {
+      render: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    } as unknown as express.Response;
+
+    renderCachedData(mockRes);
+
+    expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
+    expect(mockRes.render).toHaveBeenCalled();
+    expect(mockRes.render).toHaveBeenCalledWith('index', {
+      commits: [],
+      currentVersion: 'N/A',
+      previousVersion: 'No previous version available',
+      changeType: 'N/A',
+      repo: 'owner/repo',
+    });
   });
 
   it('should handle no commits fetched', async () => {
@@ -85,13 +106,25 @@ describe('App Endpoints', () => {
       changeType: null,
     });
 
-    const response = await request(app).get('/');
+    await refreshCache();
 
-    expect(response.status).toBe(200);
-    expect(response.text).toContain('Last Version: v1.0.0');
-    expect(response.text).toContain('No previous version available');
-    expect(response.text).toContain('Change Type: N/A');
-    expect(response.text).toContain('No commits available');
+    const mockRes = {
+      render: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    } as unknown as express.Response;
+
+    renderCachedData(mockRes);
+
+    expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
+    expect(mockRes.render).toHaveBeenCalled();
+    expect(mockRes.render).toHaveBeenCalledWith('index', {
+      commits: [],
+      currentVersion: 'v1.0.0',
+      previousVersion: 'No previous version available',
+      changeType: 'N/A',
+      repo: 'owner/repo',
+    });
   });
 
   it('should handle no tags fetched', async () => {
@@ -105,13 +138,27 @@ describe('App Endpoints', () => {
       changeType: null,
     });
 
-    const response = await request(app).get('/');
+    await refreshCache();
 
-    expect(response.status).toBe(200);
-    expect(response.text).toContain('Last Version: N/A');
-    expect(response.text).toContain('No previous version available');
-    expect(response.text).toContain('Change Type: N/A');
-    expect(response.text).toContain('Initial commit');
+    const mockRes = {
+      render: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    } as unknown as express.Response;
+
+    renderCachedData(mockRes);
+
+    expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
+    expect(mockRes.render).toHaveBeenCalled();
+    expect(mockRes.render).toHaveBeenCalledWith('index', {
+      commits: [
+        { sha: '123', commit: { message: 'Initial commit' } }
+      ],
+      currentVersion: 'N/A',
+      previousVersion: 'No previous version available',
+      changeType: 'N/A',
+      repo: 'owner/repo',
+    });
   });
 
   it('should handle only one commit', async () => {
@@ -127,13 +174,27 @@ describe('App Endpoints', () => {
       changeType: null,
     });
 
-    const response = await request(app).get('/');
+    await refreshCache();
 
-    expect(response.status).toBe(200);
-    expect(response.text).toContain('Last Version: v1.0.0');
-    expect(response.text).toContain('No previous version available');
-    expect(response.text).toContain('Change Type: N/A');
-    expect(response.text).toContain('Initial commit');
+    const mockRes = {
+      render: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    } as unknown as express.Response;
+
+    renderCachedData(mockRes);
+
+    expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
+    expect(mockRes.render).toHaveBeenCalled();
+    expect(mockRes.render).toHaveBeenCalledWith('index', {
+      commits: [
+        { sha: '123', commit: { message: 'Initial commit' } }
+      ],
+      currentVersion: 'v1.0.0',
+      previousVersion: 'No previous version available',
+      changeType: 'N/A',
+      repo: 'owner/repo',
+    });
   });
 
   it('should handle only one tag', async () => {
@@ -150,14 +211,28 @@ describe('App Endpoints', () => {
       changeType: null,
     });
 
-    const response = await request(app).get('/');
+    await refreshCache();
 
-    expect(response.status).toBe(200);
-    expect(response.text).toContain('Last Version: v1.0.0');
-    expect(response.text).toContain('No previous version available');
-    expect(response.text).toContain('Change Type: N/A');
-    expect(response.text).toContain('Initial commit');
-    expect(response.text).toContain('Second commit');
+    const mockRes = {
+      render: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    } as unknown as express.Response;
+
+    renderCachedData(mockRes);
+
+    expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
+    expect(mockRes.render).toHaveBeenCalled();
+    expect(mockRes.render).toHaveBeenCalledWith('index', {
+      commits: [
+        { sha: '123', commit: { message: 'Initial commit' } },
+        { sha: '456', commit: { message: 'Second commit' } }
+      ],
+      currentVersion: 'v1.0.0',
+      previousVersion: 'No previous version available',
+      changeType: 'N/A',
+      repo: 'owner/repo',
+    });
   });
 
   it('should handle undefined tags gracefully', async () => {
@@ -171,12 +246,26 @@ describe('App Endpoints', () => {
       changeType: null,
     });
 
-    const response = await request(app).get('/');
+    await refreshCache();
 
-    expect(response.status).toBe(200);
-    expect(response.text).toContain('Last Version: v1.0.0');
-    expect(response.text).toContain('No previous version available');
-    expect(response.text).toContain('Change Type: N/A');
-    expect(response.text).toContain('Initial commit');
+    const mockRes = {
+      render: vi.fn(),
+      status: vi.fn().mockReturnThis(),
+      send: vi.fn(),
+    } as unknown as express.Response;
+
+    renderCachedData(mockRes);
+
+    expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
+    expect(mockRes.render).toHaveBeenCalled();
+    expect(mockRes.render).toHaveBeenCalledWith('index', {
+      commits: [
+        { sha: '123', commit: { message: 'Initial commit' } }
+      ],
+      currentVersion: 'v1.0.0',
+      previousVersion: 'No previous version available',
+      changeType: 'N/A',
+      repo: 'owner/repo',
+    });
   });
 });
