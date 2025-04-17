@@ -1,11 +1,12 @@
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
   test: {
-    globals: true,
     environment: 'node',
-    setupFiles: './vitest.setup.ts',
-    exclude: [...configDefaults.exclude, 'e2e/*'],
+    globals: true,
+    exclude: [...configDefaults.exclude],
+    setupFiles: [path.resolve(__dirname, 'vitest.setup.ts')],
   },
 });

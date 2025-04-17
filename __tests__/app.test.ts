@@ -1,7 +1,7 @@
 import express from 'express';
-import app, { refreshCache, renderCachedData } from '../src/index';
 import { fetchReleaseData } from '../src/utils';
 import { vi } from 'vitest';
+import app, { refreshCache, renderCachedData } from '../src/index';
 
 // Replace jest with vi for mocking
 const mockedFetchReleaseData = fetchReleaseData as ReturnType<typeof vi.fn>;
@@ -13,6 +13,9 @@ vi.mock('../src/utils', () => ({
 vi.spyOn(app, 'listen').mockImplementation(() => vi.fn() as any);
 
 describe('App Endpoints', () => {
+  beforeEach(() => {
+  });
+
   afterEach(() => {
     vi.clearAllMocks();
   });

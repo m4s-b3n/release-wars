@@ -6,6 +6,10 @@ vi.mock('axios');
 const mockedAxios = axios as vi.Mocked<typeof axios>;
 
 describe('Utility Functions', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('fetchCommits should return an array of commits', async () => {
     mockedAxios.get.mockResolvedValueOnce({ data: [{ sha: '123', commit: { message: 'Initial commit' } }] });
 
@@ -90,9 +94,11 @@ describe('Utility Functions', () => {
 
   it('fetchReleaseData should handle one or two commits', async () => {
     mockedAxios.get
-      .mockResolvedValueOnce({ data: [
-        { sha: '123', commit: { message: 'Initial commit' } },
-      ] }) // One Commit
+      .mockResolvedValueOnce({
+        data: [
+          { sha: '123', commit: { message: 'Initial commit' } },
+        ]
+      }) // One Commit
       .mockResolvedValueOnce({ data: [{ name: 'v1.0.0', commit: { sha: '123' } }] }); // Tags
 
     const releaseDataOneCommit = await fetchReleaseData('owner', 'repo');
@@ -100,10 +106,12 @@ describe('Utility Functions', () => {
     expect(releaseDataOneCommit.commits.length).toBe(1);
 
     mockedAxios.get
-      .mockResolvedValueOnce({ data: [
-        { sha: '123', commit: { message: 'Initial commit' } },
-        { sha: '456', commit: { message: 'Second commit' } },
-      ] }) // Two Commits
+      .mockResolvedValueOnce({
+        data: [
+          { sha: '123', commit: { message: 'Initial commit' } },
+          { sha: '456', commit: { message: 'Second commit' } },
+        ]
+      }) // Two Commits
       .mockResolvedValueOnce({ data: [{ name: 'v1.0.0', commit: { sha: '123' } }] }); // Tags
 
     const releaseDataTwoCommits = await fetchReleaseData('owner', 'repo');
@@ -115,5 +123,79 @@ describe('Utility Functions', () => {
     expect(determineChangeType(null, '1.0.0')).toBe(null);
     expect(determineChangeType('1.0.0', null)).toBe(null);
     expect(determineChangeType(null, null)).toBe(null);
+  });
+});
+
+describe('fetchCommits and fetchValidTags without token', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetchCommits should not include Authorization header when GITHUB_TOKEN is not set', async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+    await fetchCommits('owner', 'repo');
+
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      'https://api.github.com/repos/owner/repo/commits',
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      }
+    );
+  });
+
+  it('fetchValidTags should not include Authorization header when GITHUB_TOKEN is not set', async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+    await fetchValidTags('owner', 'repo');
+
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      'https://api.github.com/repos/owner/repo/tags',
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      }
+    );
+  });
+
+  describe('fetchCommits and fetchValidTags with token', () => {
+    afterEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('fetchCommits should include Authorization header when token is provided', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+      await fetchCommits('owner', 'repo', 'test-token');
+
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/commits',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            Authorization: 'Bearer test-token',
+          },
+        }
+      );
+    });
+
+    it('fetchValidTags should include Authorization header when token is provided', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+      await fetchValidTags('owner', 'repo', 'test-token');
+
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/tags',
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            Authorization: 'Bearer test-token',
+          },
+        }
+      );
+    });
   });
 });

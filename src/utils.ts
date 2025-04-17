@@ -1,10 +1,21 @@
-// Moved utility functions from index.ts to utils.ts
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
 import axios from 'axios';
 import semver from 'semver';
 
-const fetchCommits = async (owner: string, repo: string) => {
+const fetchCommits = async (owner: string, repo: string, token?: string) => {
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3+json',
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   try {
-    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/commits`);
+    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/commits`, {
+      headers,
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching commits:', error);
@@ -12,9 +23,19 @@ const fetchCommits = async (owner: string, repo: string) => {
   }
 };
 
-const fetchValidTags = async (owner: string, repo: string) => {
+const fetchValidTags = async (owner: string, repo: string, token?: string) => {
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3+json',
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   try {
-    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/tags`);
+    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/tags`, {
+      headers,
+    });
     return response.data.filter((tag: any) => semver.valid(tag.name)); // Filter only valid semantic version tags
   } catch (error) {
     console.error('Error fetching tags:', error);
@@ -31,9 +52,9 @@ const determineChangeType = (currentVersion: string | null, previousVersion: str
   return 'Unknown';
 };
 
-const fetchReleaseData = async (owner: string, repo: string) => {
-  const commits = (await fetchCommits(owner, repo)) || [];
-  const tags = (await fetchValidTags(owner, repo)) || [];
+const fetchReleaseData = async (owner: string, repo: string, token?: string) => {
+  const commits = (await fetchCommits(owner, repo, token)) || [];
+  const tags = (await fetchValidTags(owner, repo, token)) || [];
 
   let currentVersion = '';
   let previousVersion = '';

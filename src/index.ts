@@ -6,6 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const REPO = process.env.REPO; // Format: owner/repo
 const CACHE_REFRESH_PERIOD = parseInt(process.env.CACHE_REFRESH_PERIOD || '30', 10) * 1000; // Default to 30 seconds
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 if (!REPO) {
   throw new Error('Environment variable REPO is required.');
@@ -27,7 +28,7 @@ let cachedData: any = null;
 const refreshCache = async () => {
   try {
     console.log('Refreshing cache...');
-    cachedData = await fetchReleaseData(owner, repo);
+    cachedData = await fetchReleaseData(owner, repo, GITHUB_TOKEN);
     console.log('Cache refreshed successfully.');
   } catch (error) {
     console.error('Error refreshing cache:', error);
