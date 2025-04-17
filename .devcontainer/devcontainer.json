@@ -1,0 +1,39 @@
+{
+	"name": "Ubuntu",
+	"image": "mcr.microsoft.com/devcontainers/base:noble",
+	"features": {
+		"ghcr.io/devcontainers/features/azure-cli:1": {
+			"version": "latest",
+			"bicepVersion": "latest"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": true,
+			"azureDnsAutoDetection": true,
+			"installDockerBuildx": true,
+			"installDockerComposeSwitch": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
+		},
+		"ghcr.io/devcontainers/features/node:1": {
+			"nodeGypDependencies": true,
+			"installYarnUsingApt": true,
+			"version": "lts",
+			"pnpmVersion": "latest",
+			"nvmVersion": "latest"
+		},
+		"ghcr.io/dhoeric/features/stern:1": {},
+		"ghcr.io/rjfmachado/devcontainer-features/cloud-native:1": {
+			"kubectl": "latest",
+			"helm": "latest",
+			"kubelogin": "latest",
+			"azwi": "latest",
+			"flux": "latest",
+			"cilium": "none"
+		},
+		"ghcr.io/rio/features/k3d:1": {},
+		"ghcr.io/audacioustux/devcontainers/k9s:1": {},
+		"ghcr.io/devcontainers-extra/features/actionlint:1": {
+			"version": "latest"
+		}
+	}
+}
