@@ -4,15 +4,15 @@
   <title>Release Info</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background: black;
-      color: #ffe81f;
-      margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      background: black;
+      color: #ffe81f;
       overflow: hidden;
     }
 
@@ -25,30 +25,37 @@
     }
 
     .container {
+      width: min(95vw, 1400px);
+      height: min(95vh, 900px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
-      width: 90%;
-      /* Adjusted for better compatibility with mobile devices */
-      max-width: 600px;
+      box-sizing: border-box;
       transform: perspective(1000px) rotateX(45deg);
+      transform-origin: center center;
+      /* Ensure rotation happens around the center */
+      margin-top: -20vh;
+      /* Adjust to move the box more into the center */
     }
 
     h1 {
-      font-size: 2.5em;
-      /* Adjusted font size for responsiveness */
+      font-size: calc(4rem + 2vw);
       margin-bottom: 20px;
       text-transform: uppercase;
     }
 
-    .info {
-      font-size: 1em;
-      /* Adjusted font size for responsiveness */
+    h2 {
+      font-size: calc(2rem + 1vw);
       margin-bottom: 20px;
+      text-transform: uppercase;
     }
 
+    .info,
     .commit {
-      font-size: 0.9em;
-      /* Adjusted font size for responsiveness */
-      margin: 10px 0;
+      font-size: calc(1rem + 0.5vw);
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -71,7 +78,6 @@
             <p>Change Type: <%= changeType || 'N/A' %>
             </p>
     </div>
-
     <h2>Last 5 Commits</h2>
     <% if (commits.length> 0) { %>
       <% commits.forEach((commit)=> { %>
@@ -84,8 +90,6 @@
               No commits available
             </div>
             <% } %>
-
-              <% /* Removed the Tags section */ %>
   </div>
 </body>
 
