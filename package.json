@@ -4,8 +4,9 @@
   "description": "Semantic Release Demo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "test": "vitest run",
+    "update": "ncu -u"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,12 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
-    "@types/semver": "^7.7.0"
+    "@types/semver": "^7.7.0",
+    "@types/supertest": "^6.0.3",
+    "@vitest/ui": "^3.1.1",
+    "npm-check-updates": "^17.1.18",
+    "supertest": "^7.1.0",
+    "ts-jest": "^29.3.2",
+    "vitest": "^3.1.1"
   }
 }

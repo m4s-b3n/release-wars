@@ -62,17 +62,30 @@
     <div class="info">
       <p>Last Version: <%= currentVersion || 'N/A' %>
       </p>
-      <p>Previous Version: <%= previousVersion || 'N/A' %>
-      </p>
-      <p>Change Type: <%= changeType || 'N/A' %>
-      </p>
+      <% if (previousVersion && previousVersion !=='N/A' ) { %>
+        <p>Previous Version: <%= previousVersion %>
+        </p>
+        <% } else { %>
+          <p>No previous version available</p>
+          <% } %>
+            <p>Change Type: <%= changeType || 'N/A' %>
+            </p>
     </div>
+
     <h2>Last 5 Commits</h2>
-    <% commits.forEach((commit)=> { %>
-      <div class="commit">
-        <%= commit.commit.message %>
-      </div>
-      <% }) %>
+    <% if (commits.length> 0) { %>
+      <% commits.forEach((commit)=> { %>
+        <div class="commit">
+          <%= commit.commit.message %>
+        </div>
+        <% }) %>
+          <% } else { %>
+            <div class="commit">
+              No commits available
+            </div>
+            <% } %>
+
+              <% /* Removed the Tags section */ %>
   </div>
 </body>
 
