@@ -1,0 +1,34 @@
+{
+  "name": "release-wars",
+  "version": "1.0.0",
+  "description": "Semantic Release Demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m4s-b3n/release-wars.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/m4s-b3n/release-wars/issues"
+  },
+  "homepage": "https://github.com/m4s-b3n/release-wars#readme",
+  "dependencies": {
+    "@types/node": "^22.14.1",
+    "axios": "^1.8.4",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "semver": "^7.7.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/semver": "^7.7.0"
+  }
+}
