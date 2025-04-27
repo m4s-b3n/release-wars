@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path";
-import { fetchReleaseData } from "./utils";
+import { fetchReleaseData as originalFetchReleaseData } from "./utils";
 
 // Main application entry point for the Release Info service
 
@@ -33,6 +33,24 @@ let cachedData: {
   previousVersion: string;
   changeType: string;
 } | null = null;
+
+// Ensure changeType is always a string by providing a default value
+const fetchReleaseData = async (
+  owner: string,
+  repo: string,
+  token?: string,
+): Promise<{
+  commits: Array<{ sha: string; commit: { message: string } }>;
+  currentVersion: string;
+  previousVersion: string;
+  changeType: string;
+}> => {
+  const data = await originalFetchReleaseData(owner, repo, token);
+  return {
+    ...data,
+    changeType: data.changeType || "N/A", // Default to "N/A" if null
+  };
+};
 
 // Refresh the cache with the latest release data
 const refreshCache = async () => {
