@@ -11,9 +11,15 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-    automerge: true
+    groups:
+      devcontainer-deps:
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: weekly
-    automerge: true
+    groups:
+      npm-deps:
+        patterns:
+          - "*"

@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Semantic Release Demo",
   "main": "index.js",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "start": "ts-node src/index.ts",
@@ -24,12 +29,12 @@
   },
   "homepage": "https://github.com/m4s-b3n/release-wars#readme",
   "dependencies": {
-    "@types/node": "^23.0.0",
+    "@types/node": "^22.15.2",
     "axios": "^1.9.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "semver": "^7.7.1",
-    "ts-node": "^11.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
