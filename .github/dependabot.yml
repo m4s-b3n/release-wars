@@ -11,7 +11,9 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    automerge: true
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: weekly
+    automerge: true

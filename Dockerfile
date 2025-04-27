@@ -1,31 +1,34 @@
 # Stage 1: Build
-FROM node:18-alpine AS builder
+FROM node:23-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
 # Install dependencies
 COPY package.json package-lock.json ./
-RUN npm ci --only=production
+RUN npm ci
 
-# Copy application files
-COPY . .
+# Copy only necessary files for building the application
+COPY package.json package-lock.json ./
+COPY src ./src
+COPY tsconfig.json ./tsconfig.json
 
 # Build the application
 RUN npm run build
 
 # Stage 2: Runtime
-FROM node:18-alpine
-
-# Set working directory
-WORKDIR /app
+FROM node:23-alpine
 
 # Create a non-root user and switch to it
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-# Copy built application from builder stage
-COPY --from=builder /app /app
+# Set working directory
+WORKDIR /app
+
+# Copy only the built application and runtime dependencies
+COPY --from=builder /app/dist ./dist
+COPY package.json package-lock.json ./
 
 # Install production dependencies only
 RUN npm ci --only=production
@@ -37,4 +40,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD curl -f http://localhost:3000 || exit 1
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]
