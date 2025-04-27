@@ -1,7 +1,8 @@
 import axios from "axios";
 import semver from "semver";
 
-// Replace 'any' with specific types for better type safety
+// Utility functions for interacting with the GitHub API and processing release data
+
 const fetchCommits = async (
   owner: string,
   repo: string,
@@ -45,9 +46,10 @@ const fetchValidTags = async (owner: string, repo: string, token?: string) => {
         headers,
       },
     );
+    // Filter tags to include only valid semantic versions
     return response.data.filter((tag: { name: string }) =>
       semver.valid(tag.name),
-    ); // Filter only valid semantic version tags
+    );
   } catch (error) {
     console.error("Error fetching tags:", error);
     return [];
@@ -58,8 +60,9 @@ const determineChangeType = (
   currentVersion: string | null,
   previousVersion: string | null,
 ) => {
-  if (!currentVersion || !previousVersion) return null; // Handle null inputs
+  if (!currentVersion || !previousVersion) return null; // Return null if either version is missing
 
+  // Determine the type of change (major, minor, patch) between two versions
   if (semver.diff(currentVersion, previousVersion) === "major") return "Major";
   if (semver.diff(currentVersion, previousVersion) === "minor") return "Minor";
   if (semver.diff(currentVersion, previousVersion) === "patch") return "Patch";

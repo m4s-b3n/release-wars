@@ -4,10 +4,13 @@
   "description": "Semantic Release Demo",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "start": "ts-node src/index.ts",
     "test": "vitest run",
     "update": "ncu -u",
-    "lint:docker": "docker-compose -f docker-compose-lint.yml up --abort-on-container-exit"
+    "lint:docker": "docker-compose -f docker-compose-lint.yml up --abort-on-container-exit",
+    "start:docker": "docker-compose -f docker-compose.yml up --abort-on-container-exit",
+    "postbuild": "cp -r src/views dist/views"
   },
   "repository": {
     "type": "git",
@@ -21,22 +24,22 @@
   },
   "homepage": "https://github.com/m4s-b3n/release-wars#readme",
   "dependencies": {
-    "@types/node": "^22.14.1",
-    "axios": "^1.8.4",
+    "@types/node": "^23.0.0",
+    "axios": "^1.9.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "semver": "^7.7.1",
-    "ts-node": "^10.9.2",
+    "ts-node": "^11.0.0",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
     "@types/semver": "^7.7.0",
     "@types/supertest": "^6.0.3",
-    "@vitest/ui": "^3.1.1",
+    "@vitest/ui": "^3.1.2",
     "npm-check-updates": "^18.0.1",
     "supertest": "^7.1.0",
     "ts-jest": "^29.3.2",
-    "vitest": "^3.1.1"
+    "vitest": "^3.1.2"
   }
 }

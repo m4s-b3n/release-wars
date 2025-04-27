@@ -1,12 +1,14 @@
 import express from "express";
 import path from "path";
-import { fetchReleaseData } from "./utils";
+import { fetchReleaseData as originalFetchReleaseData } from "./utils";
+
+// Main application entry point for the Release Info service
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const REPO = process.env.REPO; // Format: owner/repo
+const REPO = process.env.REPO; // Repository in the format owner/repo
 const CACHE_REFRESH_PERIOD =
-  parseInt(process.env.CACHE_REFRESH_PERIOD || "30", 10) * 1000; // Default to 30 seconds
+  parseInt(process.env.CACHE_REFRESH_PERIOD || "30", 10) * 1000; // Cache refresh interval in milliseconds
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 if (!REPO) {
@@ -20,11 +22,11 @@ if (!owner || !repo) {
   );
 }
 
-// Set up EJS as the templating engine
+// Configure EJS as the templating engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Cache for release data
+// Cache for storing release data
 let cachedData: {
   commits: Array<{ sha: string; commit: { message: string } }>;
   currentVersion: string;
@@ -32,7 +34,25 @@ let cachedData: {
   changeType: string;
 } | null = null;
 
-// Function to refresh the cache
+// Ensure changeType is always a string by providing a default value
+const fetchReleaseData = async (
+  owner: string,
+  repo: string,
+  token?: string,
+): Promise<{
+  commits: Array<{ sha: string; commit: { message: string } }>;
+  currentVersion: string;
+  previousVersion: string;
+  changeType: string;
+}> => {
+  const data = await originalFetchReleaseData(owner, repo, token);
+  return {
+    ...data,
+    changeType: data.changeType || "N/A", // Default to "N/A" if null
+  };
+};
+
+// Refresh the cache with the latest release data
 const refreshCache = async () => {
   try {
     console.log("Refreshing cache...");
@@ -43,13 +63,13 @@ const refreshCache = async () => {
   }
 };
 
-// Initial cache refresh
+// Perform an initial cache refresh
 refreshCache();
 
 // Set up periodic cache refresh
 setInterval(refreshCache, CACHE_REFRESH_PERIOD);
 
-// Function to render cached data
+// Render cached data to the client
 const renderCachedData = (res: express.Response): void => {
   if (!cachedData) {
     res.status(503).send("Service unavailable: data is not yet cached.");
@@ -63,7 +83,7 @@ const renderCachedData = (res: express.Response): void => {
     changeType = "N/A",
   } = cachedData;
 
-  // Ensure default values are applied consistently
+  // Prepare data for rendering, ensuring default values are applied
   const sanitizedData = {
     commits,
     currentVersion: currentVersion || "N/A",
@@ -71,7 +91,7 @@ const renderCachedData = (res: express.Response): void => {
     changeType: changeType || "N/A",
   };
 
-  // Shorten commit messages to only the first line before passing them to the template
+  // Shorten commit messages to the first line for display
   const shortenedCommits = sanitizedData.commits.map(
     (commit: { commit: { message: string } }) => {
       const firstLine = commit.commit.message.split("\n")[0];
@@ -88,7 +108,7 @@ const renderCachedData = (res: express.Response): void => {
   });
 };
 
-// Update app.get to use the dedicated function
+// Define the root endpoint to serve release information
 app.get(
   "/",
   async (req: express.Request, res: express.Response): Promise<void> => {
