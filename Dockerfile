@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:18-alpine AS builder
+FROM node:23-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY tsconfig.json ./tsconfig.json
 RUN npm run build
 
 # Stage 2: Runtime
-FROM node:18-alpine
+FROM node:23-alpine
 
 # Create a non-root user and switch to it
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
