@@ -1,11 +1,14 @@
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+import axios from "axios";
+import semver from "semver";
 
-import axios from 'axios';
-import semver from 'semver';
-
-const fetchCommits = async (owner: string, repo: string, token?: string) => {
+// Replace 'any' with specific types for better type safety
+const fetchCommits = async (
+  owner: string,
+  repo: string,
+  token?: string,
+): Promise<Array<{ sha: string; commit: { message: string } }>> => {
   const headers: Record<string, string> = {
-    Accept: 'application/vnd.github.v3+json',
+    Accept: "application/vnd.github.v3+json",
   };
 
   if (token) {
@@ -13,19 +16,22 @@ const fetchCommits = async (owner: string, repo: string, token?: string) => {
   }
 
   try {
-    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/commits`, {
-      headers,
-    });
+    const response = await axios.get(
+      `https://api.github.com/repos/${owner}/${repo}/commits`,
+      {
+        headers,
+      },
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching commits:', error);
+    console.error("Error fetching commits:", error);
     return [];
   }
 };
 
 const fetchValidTags = async (owner: string, repo: string, token?: string) => {
   const headers: Record<string, string> = {
-    Accept: 'application/vnd.github.v3+json',
+    Accept: "application/vnd.github.v3+json",
   };
 
   if (token) {
@@ -33,31 +39,43 @@ const fetchValidTags = async (owner: string, repo: string, token?: string) => {
   }
 
   try {
-    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/tags`, {
-      headers,
-    });
-    return response.data.filter((tag: any) => semver.valid(tag.name)); // Filter only valid semantic version tags
+    const response = await axios.get(
+      `https://api.github.com/repos/${owner}/${repo}/tags`,
+      {
+        headers,
+      },
+    );
+    return response.data.filter((tag: { name: string }) =>
+      semver.valid(tag.name),
+    ); // Filter only valid semantic version tags
   } catch (error) {
-    console.error('Error fetching tags:', error);
+    console.error("Error fetching tags:", error);
     return [];
   }
 };
 
-const determineChangeType = (currentVersion: string | null, previousVersion: string | null) => {
+const determineChangeType = (
+  currentVersion: string | null,
+  previousVersion: string | null,
+) => {
   if (!currentVersion || !previousVersion) return null; // Handle null inputs
 
-  if (semver.diff(currentVersion, previousVersion) === 'major') return 'Major';
-  if (semver.diff(currentVersion, previousVersion) === 'minor') return 'Minor';
-  if (semver.diff(currentVersion, previousVersion) === 'patch') return 'Patch';
-  return 'Unknown';
+  if (semver.diff(currentVersion, previousVersion) === "major") return "Major";
+  if (semver.diff(currentVersion, previousVersion) === "minor") return "Minor";
+  if (semver.diff(currentVersion, previousVersion) === "patch") return "Patch";
+  return "None";
 };
 
-const fetchReleaseData = async (owner: string, repo: string, token?: string) => {
+const fetchReleaseData = async (
+  owner: string,
+  repo: string,
+  token?: string,
+) => {
   const commits = (await fetchCommits(owner, repo, token)) || [];
   const tags = (await fetchValidTags(owner, repo, token)) || [];
 
-  let currentVersion = '';
-  let previousVersion = '';
+  let currentVersion = "";
+  let previousVersion = "";
   let changeType: string | null = null;
 
   if (tags.length > 0) {

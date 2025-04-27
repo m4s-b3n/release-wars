@@ -1,50 +1,52 @@
-import express from 'express';
-import { fetchReleaseData } from '../src/utils';
-import { vi } from 'vitest';
-import app, { refreshCache, renderCachedData } from '../src/index';
+import express from "express";
+import { fetchReleaseData } from "../src/utils";
+import { vi } from "vitest";
+import app, { refreshCache, renderCachedData } from "../src/index";
 
 // Replace jest with vi for mocking
 const mockedFetchReleaseData = fetchReleaseData as ReturnType<typeof vi.fn>;
 
-vi.mock('../src/utils', () => ({
+vi.mock("../src/utils", () => ({
   fetchReleaseData: vi.fn(),
 }));
 
-vi.spyOn(app, 'listen').mockImplementation(() => vi.fn() as any);
+// Replace 'any' with specific types for better type safety
+vi.spyOn(app, "listen").mockImplementation(
+  () => vi.fn() as jest.MockInstance<() => void, []>,
+);
 
-describe('App Endpoints', () => {
-  beforeEach(() => {
-  });
+describe("App Endpoints", () => {
+  beforeEach(() => {});
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  test('environment variable is set', () => {
-    expect(process.env.REPO).toBe('owner/repo');
+  test("environment variable is set", () => {
+    expect(process.env.REPO).toBe("owner/repo");
   });
 
-  it('should call utility function with the right parameters', async () => {
+  it("should call utility function with the right parameters", async () => {
     mockedFetchReleaseData.mockResolvedValueOnce({
       commits: [
-        { sha: '123', commit: { message: 'Initial commit' } },
-        { sha: '456', commit: { message: 'Second commit' } },
-        { sha: '789', commit: { message: 'Third commit' } },
-        { sha: 'abc', commit: { message: 'Fourth commit' } },
-        { sha: 'def', commit: { message: 'Fifth commit' } },
-        { sha: 'ghi', commit: { message: 'Sixth commit' } },
-        { sha: 'jkl', commit: { message: 'Seventh commit' } },
-        { sha: 'mno', commit: { message: 'Eighth commit' } },
-        { sha: 'pqr', commit: { message: 'Ninth commit' } },
-        { sha: 'stu', commit: { message: 'Tenth commit' } }
+        { sha: "123", commit: { message: "Initial commit" } },
+        { sha: "456", commit: { message: "Second commit" } },
+        { sha: "789", commit: { message: "Third commit" } },
+        { sha: "abc", commit: { message: "Fourth commit" } },
+        { sha: "def", commit: { message: "Fifth commit" } },
+        { sha: "ghi", commit: { message: "Sixth commit" } },
+        { sha: "jkl", commit: { message: "Seventh commit" } },
+        { sha: "mno", commit: { message: "Eighth commit" } },
+        { sha: "pqr", commit: { message: "Ninth commit" } },
+        { sha: "stu", commit: { message: "Tenth commit" } },
       ],
       tags: [
-        { name: 'v1.0.0', commit: { sha: '123' } },
-        { name: 'v0.9.0', commit: { sha: '456' } }
+        { name: "v1.0.0", commit: { sha: "123" } },
+        { name: "v0.9.0", commit: { sha: "456" } },
       ],
-      currentVersion: 'v1.0.0',
-      previousVersion: 'v0.9.0',
-      changeType: 'Minor',
+      currentVersion: "v1.0.0",
+      previousVersion: "v0.9.0",
+      changeType: "Minor",
     });
 
     await refreshCache();
@@ -59,22 +61,22 @@ describe('App Endpoints', () => {
 
     expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
     expect(mockRes.render).toHaveBeenCalled();
-    expect(mockRes.render).toHaveBeenCalledWith('index', {
+    expect(mockRes.render).toHaveBeenCalledWith("index", {
       commits: [
-        { sha: '123', commit: { message: 'Initial commit' } },
-        { sha: '456', commit: { message: 'Second commit' } },
-        { sha: '789', commit: { message: 'Third commit' } },
-        { sha: 'abc', commit: { message: 'Fourth commit' } },
-        { sha: 'def', commit: { message: 'Fifth commit' } }
+        { sha: "123", commit: { message: "Initial commit" } },
+        { sha: "456", commit: { message: "Second commit" } },
+        { sha: "789", commit: { message: "Third commit" } },
+        { sha: "abc", commit: { message: "Fourth commit" } },
+        { sha: "def", commit: { message: "Fifth commit" } },
       ],
-      currentVersion: 'v1.0.0',
-      previousVersion: 'v0.9.0',
-      changeType: 'Minor',
-      repo: 'owner/repo',
+      currentVersion: "v1.0.0",
+      previousVersion: "v0.9.0",
+      changeType: "Minor",
+      repo: "owner/repo",
     });
   });
 
-  it('should handle no data at all', async () => {
+  it("should handle no data at all", async () => {
     mockedFetchReleaseData.mockResolvedValueOnce({});
 
     await refreshCache();
@@ -89,23 +91,21 @@ describe('App Endpoints', () => {
 
     expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
     expect(mockRes.render).toHaveBeenCalled();
-    expect(mockRes.render).toHaveBeenCalledWith('index', {
+    expect(mockRes.render).toHaveBeenCalledWith("index", {
       commits: [],
-      currentVersion: 'N/A',
-      previousVersion: 'No previous version available',
-      changeType: 'N/A',
-      repo: 'owner/repo',
+      currentVersion: "N/A",
+      previousVersion: "No previous version available",
+      changeType: "N/A",
+      repo: "owner/repo",
     });
   });
 
-  it('should handle no commits fetched', async () => {
+  it("should handle no commits fetched", async () => {
     mockedFetchReleaseData.mockResolvedValueOnce({
       commits: [],
-      tags: [
-        { name: 'v1.0.0', commit: { sha: '123' } }
-      ],
-      currentVersion: 'v1.0.0',
-      previousVersion: '',
+      tags: [{ name: "v1.0.0", commit: { sha: "123" } }],
+      currentVersion: "v1.0.0",
+      previousVersion: "",
       changeType: null,
     });
 
@@ -121,23 +121,21 @@ describe('App Endpoints', () => {
 
     expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
     expect(mockRes.render).toHaveBeenCalled();
-    expect(mockRes.render).toHaveBeenCalledWith('index', {
+    expect(mockRes.render).toHaveBeenCalledWith("index", {
       commits: [],
-      currentVersion: 'v1.0.0',
-      previousVersion: 'No previous version available',
-      changeType: 'N/A',
-      repo: 'owner/repo',
+      currentVersion: "v1.0.0",
+      previousVersion: "No previous version available",
+      changeType: "N/A",
+      repo: "owner/repo",
     });
   });
 
-  it('should handle no tags fetched', async () => {
+  it("should handle no tags fetched", async () => {
     mockedFetchReleaseData.mockResolvedValueOnce({
-      commits: [
-        { sha: '123', commit: { message: 'Initial commit' } }
-      ],
+      commits: [{ sha: "123", commit: { message: "Initial commit" } }],
       tags: [],
-      currentVersion: '',
-      previousVersion: '',
+      currentVersion: "",
+      previousVersion: "",
       changeType: null,
     });
 
@@ -153,27 +151,21 @@ describe('App Endpoints', () => {
 
     expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
     expect(mockRes.render).toHaveBeenCalled();
-    expect(mockRes.render).toHaveBeenCalledWith('index', {
-      commits: [
-        { sha: '123', commit: { message: 'Initial commit' } }
-      ],
-      currentVersion: 'N/A',
-      previousVersion: 'No previous version available',
-      changeType: 'N/A',
-      repo: 'owner/repo',
+    expect(mockRes.render).toHaveBeenCalledWith("index", {
+      commits: [{ sha: "123", commit: { message: "Initial commit" } }],
+      currentVersion: "N/A",
+      previousVersion: "No previous version available",
+      changeType: "N/A",
+      repo: "owner/repo",
     });
   });
 
-  it('should handle only one commit', async () => {
+  it("should handle only one commit", async () => {
     mockedFetchReleaseData.mockResolvedValueOnce({
-      commits: [
-        { sha: '123', commit: { message: 'Initial commit' } }
-      ],
-      tags: [
-        { name: 'v1.0.0', commit: { sha: '123' } }
-      ],
-      currentVersion: 'v1.0.0',
-      previousVersion: '',
+      commits: [{ sha: "123", commit: { message: "Initial commit" } }],
+      tags: [{ name: "v1.0.0", commit: { sha: "123" } }],
+      currentVersion: "v1.0.0",
+      previousVersion: "",
       changeType: null,
     });
 
@@ -189,28 +181,24 @@ describe('App Endpoints', () => {
 
     expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
     expect(mockRes.render).toHaveBeenCalled();
-    expect(mockRes.render).toHaveBeenCalledWith('index', {
-      commits: [
-        { sha: '123', commit: { message: 'Initial commit' } }
-      ],
-      currentVersion: 'v1.0.0',
-      previousVersion: 'No previous version available',
-      changeType: 'N/A',
-      repo: 'owner/repo',
+    expect(mockRes.render).toHaveBeenCalledWith("index", {
+      commits: [{ sha: "123", commit: { message: "Initial commit" } }],
+      currentVersion: "v1.0.0",
+      previousVersion: "No previous version available",
+      changeType: "N/A",
+      repo: "owner/repo",
     });
   });
 
-  it('should handle only one tag', async () => {
+  it("should handle only one tag", async () => {
     mockedFetchReleaseData.mockResolvedValueOnce({
       commits: [
-        { sha: '123', commit: { message: 'Initial commit' } },
-        { sha: '456', commit: { message: 'Second commit' } }
+        { sha: "123", commit: { message: "Initial commit" } },
+        { sha: "456", commit: { message: "Second commit" } },
       ],
-      tags: [
-        { name: 'v1.0.0', commit: { sha: '123' } }
-      ],
-      currentVersion: 'v1.0.0',
-      previousVersion: '',
+      tags: [{ name: "v1.0.0", commit: { sha: "123" } }],
+      currentVersion: "v1.0.0",
+      previousVersion: "",
       changeType: null,
     });
 
@@ -226,26 +214,24 @@ describe('App Endpoints', () => {
 
     expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
     expect(mockRes.render).toHaveBeenCalled();
-    expect(mockRes.render).toHaveBeenCalledWith('index', {
+    expect(mockRes.render).toHaveBeenCalledWith("index", {
       commits: [
-        { sha: '123', commit: { message: 'Initial commit' } },
-        { sha: '456', commit: { message: 'Second commit' } }
+        { sha: "123", commit: { message: "Initial commit" } },
+        { sha: "456", commit: { message: "Second commit" } },
       ],
-      currentVersion: 'v1.0.0',
-      previousVersion: 'No previous version available',
-      changeType: 'N/A',
-      repo: 'owner/repo',
+      currentVersion: "v1.0.0",
+      previousVersion: "No previous version available",
+      changeType: "N/A",
+      repo: "owner/repo",
     });
   });
 
-  it('should handle undefined tags gracefully', async () => {
+  it("should handle undefined tags gracefully", async () => {
     mockedFetchReleaseData.mockResolvedValueOnce({
-      commits: [
-        { sha: '123', commit: { message: 'Initial commit' } }
-      ],
+      commits: [{ sha: "123", commit: { message: "Initial commit" } }],
       tags: undefined, // Simulate undefined tags
-      currentVersion: 'v1.0.0',
-      previousVersion: '',
+      currentVersion: "v1.0.0",
+      previousVersion: "",
       changeType: null,
     });
 
@@ -261,14 +247,12 @@ describe('App Endpoints', () => {
 
     expect(mockRes.status).not.toHaveBeenCalledWith(503); // Ensure no 503 error
     expect(mockRes.render).toHaveBeenCalled();
-    expect(mockRes.render).toHaveBeenCalledWith('index', {
-      commits: [
-        { sha: '123', commit: { message: 'Initial commit' } }
-      ],
-      currentVersion: 'v1.0.0',
-      previousVersion: 'No previous version available',
-      changeType: 'N/A',
-      repo: 'owner/repo',
+    expect(mockRes.render).toHaveBeenCalledWith("index", {
+      commits: [{ sha: "123", commit: { message: "Initial commit" } }],
+      currentVersion: "v1.0.0",
+      previousVersion: "No previous version available",
+      changeType: "N/A",
+      repo: "owner/repo",
     });
   });
 });

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "test": "vitest run",
-    "update": "ncu -u"
+    "update": "ncu -u",
+    "lint:docker": "docker-compose -f docker-compose-lint.yml up --abort-on-container-exit"
   },
   "repository": {
     "type": "git",

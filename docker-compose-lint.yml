@@ -1,0 +1,26 @@
+---
+version: "3.8"
+
+services:
+  super-linter:
+    image: ghcr.io/super-linter/super-linter:slim-v7
+    container_name: super-linter
+    environment:
+      - RUN_LOCAL=true
+      - DEFAULT_BRANCH=main
+      - LOG_LEVEL=INFO
+      - VALIDATE_JSCPD=false
+      - VALIDATE_TYPESCRIPT_STANDARD=false
+      - FILTER_REGEX_EXCLUDE=node_modules
+      - FIX_JSON_PRETTIER=true
+      - FIX_JSON=true
+      - FIX_JSONC=true
+      - FIX_JSONC_PRETTIER=true
+      - FIX_MARKDOWN_PRETTIER=true
+      - FIX_MARKDOWN=true
+      - FIX_TYPESCRIPT_ES=true
+      - FIX_TYPESCRIPT_PRETTIER=true
+      - FIX_YAML_PRETTIER=true
+    volumes:
+      - .:/tmp/lint
+    working_dir: /tmp/lint
