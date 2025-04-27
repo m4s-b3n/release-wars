@@ -18,6 +18,9 @@ jobs:
     permissions:
       contents: write
       statuses: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-lint
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,6 +39,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-test
+      cancel-in-progress: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,6 +70,9 @@ jobs:
       - build
     permissions:
       contents: read
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-release
+      cancel-in-progress: false
     outputs:
       new_release_published: ${{ steps.semrel.outputs.new_release_published == 'true' }}
       new_release_version: ${{ steps.semrel.outputs.new_release_version }}
