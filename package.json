@@ -10,11 +10,11 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "ts-node src/index.ts",
+    "start": "docker-compose -f docker-compose.yml up --abort-on-container-exit",
+    "dev": "ts-node src/index.ts",
     "test": "vitest run",
     "update": "ncu -u",
-    "lint:docker": "docker-compose -f docker-compose-lint.yml up --abort-on-container-exit",
-    "start:docker": "docker-compose -f docker-compose.yml up --abort-on-container-exit",
+    "lint": "docker-compose -f docker-compose-lint.yml up --abort-on-container-exit",
     "postbuild": "cp -r src/views dist/views"
   },
   "repository": {

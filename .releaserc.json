@@ -1,7 +1,5 @@
 {
-  "branches": [
-    "main"
-  ],
+  "branches": ["main"],
   "tagFormat": "${version}",
   "plugins": [
     "@semantic-release/commit-analyzer",
@@ -23,9 +21,7 @@
       "@semantic-release/git",
       {
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-        "assets": [
-          "CHANGELOG.md"
-        ]
+        "assets": ["CHANGELOG.md"]
       }
     ],
     [

@@ -13,6 +13,7 @@ permissions: {}
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -25,16 +26,19 @@ jobs:
         uses: super-linter/super-linter@v7.3.0 # x-release-please-version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ENABLE_COMMITLINT_STRICT_MODE: true
+          ENFORCE_COMMITLINT_CONFIGURATION_CHECK: true
           VALIDATE_JSCPD: false
           VALIDATE_TYPESCRIPT_STANDARD: false
 
   test:
+    name: Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -46,6 +50,7 @@ jobs:
         run: npm test
 
   build:
+    name: Build
     runs-on: ubuntu-latest
     needs: [lint, test]
     steps:
@@ -80,7 +85,12 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         with:
           extra_plugins: |
-            semantic-release-replace-plugin
+            @semantic-release/commit-analyzer
+            @semantic-release/release-notes-generator
+            @semantic-release/changelog
+            @semantic-release/npm
+            @semantic-release/git
+            @semantic-release/github
           dry_run: ${{ github.event_name != 'push' }}
           ci: true
         env:
