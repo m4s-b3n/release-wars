@@ -39,5 +39,12 @@
       "installDirectlyFromGitHubRelease": true,
       "version": "latest"
     }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Mattickx.copilotignore-vscode"
+      ]
+    }
   }
 }
