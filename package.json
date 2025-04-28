@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/m4s-b3n/release-wars#readme",
   "dependencies": {
-    "@types/node": "^22.15.2",
+    "@types/node": "^22.15.3",
     "axios": "^1.9.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
