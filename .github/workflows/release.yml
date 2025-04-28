@@ -14,6 +14,7 @@ permissions: {}
 jobs:
   lint:
     name: Lint
+    if: ${{ vars.SKIP_LINT != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,7 +27,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Super-Linter
-        uses: super-linter/super-linter@v7.3.0 # x-release-please-version
+        uses: super-linter/super-linter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENABLE_COMMITLINT_STRICT_MODE: true
@@ -64,7 +65,10 @@ jobs:
 
   build:
     name: Build
-    needs: [lint, test]
+    if: always() && !cancelled() && !failure() # https://github.com/actions/runner/issues/2205#issuecomment-1381988186
+    needs:
+      - lint
+      - test
     permissions:
       contents: read
       packages: write
@@ -74,12 +78,14 @@ jobs:
 
   release:
     name: Release
-    runs-on: ubuntu-latest
+    if: always() && !cancelled() && !failure() # https://github.com/actions/runner/issues/2205#issuecomment-1381988186
     needs:
-      - lint
       - build
+    runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      issues: write
+      pull-requests: write
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-release
       cancel-in-progress: false
@@ -95,6 +101,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/create-github-app-token@v2
+        if: ${{ vars.APP_ID_SEMREL != '' }}
         id: token
         with:
           app-id: ${{ vars.APP_ID_SEMREL }}
@@ -113,4 +120,4 @@ jobs:
           dry_run: ${{ github.event_name != 'push' }}
           ci: true
         env:
-          GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.token.outputs.token || secrets.GITHUB_TOKEN }}
