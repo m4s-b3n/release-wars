@@ -123,6 +123,10 @@ jobs:
           GITHUB_TOKEN: ${{ steps.token.outputs.token || secrets.GITHUB_TOKEN }}
 
   dependabot:
+    name: Dependabot Auto-Merge
+    if: ${{ github.event_name == 'pull_request' }}
+    needs:
+      - release
     runs-on: ubuntu-latest
     permissions:
       contents: read
