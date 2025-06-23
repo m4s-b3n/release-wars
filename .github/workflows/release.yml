@@ -121,3 +121,23 @@ jobs:
           ci: true
         env:
           GITHUB_TOKEN: ${{ steps.token.outputs.token || secrets.GITHUB_TOKEN }}
+
+  dependabot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-test
+      cancel-in-progress: true
+    steps:
+      - uses: actions/create-github-app-token@v2
+        if: ${{ vars.APP_ID_SEMREL != '' }}
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID_SEMREL }}
+          private-key: ${{ secrets.APP_KEY_SEMREL }}
+      - uses: ahmadnassri/action-dependabot-auto-merge@v2
+        with:
+          target: minor
+          github-token: ${{ steps.token.outputs.token || secrets.GITHUB_TOKEN }}
